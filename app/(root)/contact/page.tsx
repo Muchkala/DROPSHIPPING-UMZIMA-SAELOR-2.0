@@ -21,7 +21,7 @@ export default function ContactPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">Subject</label>
-                            <select className="w-full px-3 py-2 border rounded-md">
+                            <select className="w-full px-3 py-2 border rounded-md" title="Select inquiry type">
                                 <option>General Inquiry</option>
                                 <option>Technical Support</option>
                                 <option>Partnership Opportunities</option>

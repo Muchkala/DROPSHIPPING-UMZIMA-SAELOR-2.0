@@ -36,7 +36,7 @@ export default function AboutPage() {
                 
                 <h2 className="text-2xl font-semibold mt-8 mb-4">Contact Us</h2>
                 <p>
-                    Ready to start your dropshipping journey? Have questions about our platform? We'd love to hear from you. 
+                    Ready to start your dropshipping journey? Have questions about our platform? We&apos;d love to hear from you. 
                     Visit our contact page or reach out to us directly at support@freexit.com.
                 </p>
             </div>
