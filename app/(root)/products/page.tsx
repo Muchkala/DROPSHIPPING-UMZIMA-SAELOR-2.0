@@ -1,0 +1,747 @@
+"use client"
+
+import { useState, useEffect } from 'react'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  MoreHorizontal, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  Copy, 
+  Download,
+  Upload,
+  Package,
+  TrendingUp,
+  DollarSign,
+  Users,
+  ShoppingCart,
+  BarChart3,
+  Settings,
+  Grid3X3,
+  List,
+  Star,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Archive
+} from "lucide-react"
+
+interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  category: string
+  status: 'active' | 'draft' | 'archived'
+  inventory: number
+  sku: string
+  images: string[]
+  tags: string[]
+  createdAt: string
+  updatedAt: string
+  sales: number
+  revenue: number
+  rating: number
+  reviews: number
+}
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedStatus, setSelectedStatus] = useState("all")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [newProduct, setNewProduct] = useState<Partial<Product>>({
+    name: "",
+    description: "",
+    price: 0,
+    category: "",
+    status: "draft",
+    inventory: 0,
+    sku: "",
+    tags: [],
+    images: []
+  })
+
+  const categories = ["Electronics", "Clothing", "Home & Garden", "Sports", "Books", "Toys", "Beauty", "Food"]
+  const statuses = ["all", "active", "draft", "archived"]
+
+  useEffect(() => {
+    // Initialize with sample data
+    const sampleProducts: Product[] = [
+      {
+        id: "1",
+        name: "Wireless Bluetooth Headphones",
+        description: "Premium noise-cancelling headphones with 30-hour battery life",
+        price: 199.99,
+        category: "Electronics",
+        status: "active",
+        inventory: 45,
+        sku: "WBH-001",
+        images: ["/api/placeholder/300/300"],
+        tags: ["wireless", "bluetooth", "noise-cancelling"],
+        createdAt: "2024-01-15",
+        updatedAt: "2024-01-20",
+        sales: 128,
+        revenue: 25598.72,
+        rating: 4.5,
+        reviews: 89
+      },
+      {
+        id: "2",
+        name: "Organic Cotton T-Shirt",
+        description: "Sustainable and comfortable everyday wear",
+        price: 29.99,
+        category: "Clothing",
+        status: "active",
+        inventory: 120,
+        sku: "OCT-002",
+        images: ["/api/placeholder/300/300"],
+        tags: ["organic", "cotton", "sustainable"],
+        createdAt: "2024-01-10",
+        updatedAt: "2024-01-18",
+        sales: 256,
+        revenue: 7677.44,
+        rating: 4.8,
+        reviews: 156
+      },
+      {
+        id: "3",
+        name: "Smart Home Security Camera",
+        description: "1080p HD camera with night vision and motion detection",
+        price: 89.99,
+        category: "Electronics",
+        status: "draft",
+        inventory: 0,
+        sku: "SHC-003",
+        images: ["/api/placeholder/300/300"],
+        tags: ["smart home", "security", "wifi"],
+        createdAt: "2024-01-22",
+        updatedAt: "2024-01-22",
+        sales: 0,
+        revenue: 0,
+        rating: 0,
+        reviews: 0
+      }
+    ]
+    setProducts(sampleProducts)
+  }, [])
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.sku.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+    const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
+    return matchesSearch && matchesCategory && matchesStatus
+  })
+
+  const handleCreateProduct = () => {
+    if (newProduct.name && newProduct.price && newProduct.category) {
+      const product: Product = {
+        id: Date.now().toString(),
+        name: newProduct.name,
+        description: newProduct.description || "",
+        price: newProduct.price,
+        category: newProduct.category,
+        status: newProduct.status as 'active' | 'draft' | 'archived',
+        inventory: newProduct.inventory || 0,
+        sku: newProduct.sku || `SKU-${Date.now()}`,
+        images: newProduct.images || [],
+        tags: newProduct.tags || [],
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0],
+        sales: 0,
+        revenue: 0,
+        rating: 0,
+        reviews: 0
+      }
+      setProducts([...products, product])
+      setNewProduct({
+        name: "",
+        description: "",
+        price: 0,
+        category: "",
+        status: "draft",
+        inventory: 0,
+        sku: "",
+        tags: [],
+        images: []
+      })
+      setIsCreateDialogOpen(false)
+    }
+  }
+
+  const handleUpdateProduct = () => {
+    if (editingProduct) {
+      setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p))
+      setEditingProduct(null)
+    }
+  }
+
+  const handleDeleteProduct = (id: string) => {
+    setProducts(products.filter(p => p.id !== id))
+  }
+
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      active: "default",
+      draft: "secondary",
+      archived: "outline"
+    } as const
+    return <Badge variant={variants[status as keyof typeof variants]}>{status}</Badge>
+  }
+
+  const getInventoryStatus = (inventory: number) => {
+    if (inventory === 0) return <Badge variant="destructive">Out of Stock</Badge>
+    if (inventory < 10) return <Badge variant="secondary">Low Stock</Badge>
+    return <Badge variant="default">In Stock</Badge>
+  }
+
+  const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0)
+  const totalSales = products.reduce((sum, p) => sum + p.sales, 0)
+  const activeProducts = products.filter(p => p.status === 'active').length
+  const averageRating = products.filter(p => p.rating > 0).reduce((sum, p) => sum + p.rating, 0) / products.filter(p => p.rating > 0).length || 0
+
+  return (
+    <div className="flex-1 space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <p className="text-muted-foreground">Manage your product inventory and sales</p>
+        </div>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Create New Product</DialogTitle>
+              <DialogDescription>
+                Add a new product to your inventory. Fill in the details below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Product Name</Label>
+                  <Input
+                    id="name"
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    placeholder="Enter product name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sku">SKU</Label>
+                  <Input
+                    id="sku"
+                    value={newProduct.sku}
+                    onChange={(e) => setNewProduct({...newProduct, sku: e.target.value})}
+                    placeholder="Auto-generated if empty"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  placeholder="Describe your product"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={newProduct.price}
+                    onChange={(e) => setNewProduct({...newProduct, price: parseFloat(e.target.value) || 0})}
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="inventory">Inventory</Label>
+                  <Input
+                    id="inventory"
+                    type="number"
+                    value={newProduct.inventory}
+                    onChange={(e) => setNewProduct({...newProduct, inventory: parseInt(e.target.value) || 0})}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={newProduct.status} onValueChange={(value: 'active' | 'draft' | 'archived') => setNewProduct({...newProduct, status: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreateProduct}>Create Product</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+12.5%</span> from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalSales}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+8.2%</span> from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{activeProducts}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-blue-600">{products.length - activeProducts} in draft</span>
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{averageRating.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground">
+              Based on {products.reduce((sum, p) => sum + p.reviews, 0)} reviews
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-2 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map(category => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statuses.map(status => (
+                <SelectItem key={status} value={status}>
+                  {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+          >
+            {viewMode === "grid" ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Products Display */}
+      <Tabs defaultValue="all" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="all">All Products ({products.length})</TabsTrigger>
+          <TabsTrigger value="active">Active ({activeProducts})</TabsTrigger>
+          <TabsTrigger value="draft">Draft ({products.filter(p => p.status === 'draft').length})</TabsTrigger>
+          <TabsTrigger value="archived">Archived ({products.filter(p => p.status === 'archived').length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-4">
+          {viewMode === "grid" ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredProducts.map((product) => (
+                <Card key={product.id} className="overflow-hidden">
+                  <div className="aspect-square bg-muted relative">
+                    <img
+                      src={product.images[0] || "/api/placeholder/300/300"}
+                      alt={product.name}
+                      className="object-cover w-full h-full"
+                    />
+                    <div className="absolute top-2 right-2">
+                      {getStatusBadge(product.status)}
+                    </div>
+                  </div>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{product.name}</CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <CardDescription className="line-clamp-2">
+                      {product.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-2xl font-bold">${product.price}</span>
+                      {getInventoryStatus(product.inventory)}
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>SKU: {product.sku}</span>
+                      <span>{product.sales} sold</span>
+                    </div>
+                    <div className="flex gap-1 flex-wrap">
+                      {product.tags.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {product.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{product.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span>{product.rating.toFixed(1)}</span>
+                      <span className="text-muted-foreground">({product.reviews} reviews)</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Inventory</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Sales</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Rating</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-md bg-muted overflow-hidden">
+                            <img
+                              src={product.images[0] || "/api/placeholder/40/40"}
+                              alt={product.name}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-sm text-muted-foreground line-clamp-1">
+                              {product.description}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{product.sku}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span>{product.inventory}</span>
+                          {getInventoryStatus(product.inventory)}
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(product.status)}</TableCell>
+                      <TableCell>{product.sales}</TableCell>
+                      <TableCell>${product.revenue.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span>{product.rating.toFixed(1)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Copy className="mr-2 h-4 w-4" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-destructive"
+                              onClick={() => handleDeleteProduct(product.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="active">
+          <div className="text-center py-8">
+            <Package className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-lg font-semibold">Active Products</h3>
+            <p className="text-muted-foreground">
+              {filteredProducts.filter(p => p.status === 'active').length} products currently live
+            </p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="draft">
+          <div className="text-center py-8">
+            <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-lg font-semibold">Draft Products</h3>
+            <p className="text-muted-foreground">
+              {filteredProducts.filter(p => p.status === 'draft').length} products in draft
+            </p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="archived">
+          <div className="text-center py-8">
+            <Archive className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-lg font-semibold">Archived Products</h3>
+            <p className="text-muted-foreground">
+              {filteredProducts.filter(p => p.status === 'archived').length} products archived
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Edit Product Dialog */}
+      {editingProduct && (
+        <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+              <DialogDescription>
+                Update product information. Changes will be saved immediately.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Product Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-sku">SKU</Label>
+                  <Input
+                    id="edit-sku"
+                    value={editingProduct.sku}
+                    onChange={(e) => setEditingProduct({...editingProduct, sku: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingProduct.description}
+                  onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-price">Price</Label>
+                  <Input
+                    id="edit-price"
+                    type="number"
+                    value={editingProduct.price}
+                    onChange={(e) => setEditingProduct({...editingProduct, price: parseFloat(e.target.value) || 0})}
+                    step="0.01"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-inventory">Inventory</Label>
+                  <Input
+                    id="edit-inventory"
+                    type="number"
+                    value={editingProduct.inventory}
+                    onChange={(e) => setEditingProduct({...editingProduct, inventory: parseInt(e.target.value) || 0})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-category">Category</Label>
+                  <Select value={editingProduct.category} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-status">Status</Label>
+                <Select value={editingProduct.status} onValueChange={(value: 'active' | 'draft' | 'archived') => setEditingProduct({...editingProduct, status: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingProduct(null)}>Cancel</Button>
+              <Button onClick={handleUpdateProduct}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  )
+}

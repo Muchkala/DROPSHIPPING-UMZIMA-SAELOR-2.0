@@ -11,10 +11,10 @@ export default function DarkToggle() {
     useEffect(() => { setIsRender(true) }, [])
     return (
         isRender && resolvedTheme === 'dark' ? 
-            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-md hover:bg-accent transition-all duration-200" onClick={() => setTheme('light')}>
+            <Button variant="ghost" size="icon" className="h-[34px] w-[34px] rounded-md hover:bg-accent transition-all duration-200" onClick={() => setTheme('light')}>
                 <Sun className="h-10 w-10 text-amber-500" strokeWidth={3} />
             </Button> : 
-            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-md hover:bg-accent transition-all duration-200" onClick={() => setTheme('dark')}>
+            <Button variant="ghost" size="icon" className="h-[34px] w-[34px] rounded-md hover:bg-accent transition-all duration-200" onClick={() => setTheme('dark')}>
                 <Moon className="h-10 w-10 text-black fill-black" strokeWidth={3} />
             </Button>
     )
