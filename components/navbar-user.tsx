@@ -23,7 +23,7 @@ export function NavbarUser({
         <Button
           variant="ghost"
           size="icon"
-          className="h-12 w-12 rounded-md hover:bg-accent transition-all duration-200"
+          className="h-8 w-8 rounded-md hover:bg-accent transition-all duration-200"
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary/90 text-primary-foreground text-base font-semibold">
             {user.name.charAt(0).toUpperCase()}
