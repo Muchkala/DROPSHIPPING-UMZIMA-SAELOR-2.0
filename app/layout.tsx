@@ -16,8 +16,8 @@ const lato = Lato({
 })
 
 export const metadata: Metadata = {
-  title: "Fintechhub - Aytiga oid songgi yangiliklar",
-  description: "Bizning dasturlashga oid blogimizga xush kelibsiz! Songgi yangiliklar faqat bizda!",
+  title: "Freexit - Dropshipping Muvaffaqiyat Platformangiz",
+  description: "Freexit bilan dropshipping safariyangizni boshlang! Elektron savdo uchun to'liq asboblar, mahsulotlar va strategiyalar.",
 };
 
 export default function RootLayout({ children }: ChildProps) {
