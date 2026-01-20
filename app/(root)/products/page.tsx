@@ -38,7 +38,8 @@ import {
   ArrowDownRight,
   Minus,
   Archive,
-  ImageOff
+  ImageOff,
+  Loader2
 } from "lucide-react"
 
 interface Product {
@@ -67,6 +68,7 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: "",
@@ -154,37 +156,42 @@ export default function ProductsPage() {
 
   const handleCreateProduct = () => {
     if (newProduct.name && newProduct.price && newProduct.category) {
-      const product: Product = {
-        id: Date.now().toString(),
-        name: newProduct.name,
-        description: newProduct.description || "",
-        price: newProduct.price,
-        category: newProduct.category,
-        status: newProduct.status as 'active' | 'draft' | 'archived',
-        inventory: newProduct.inventory || 0,
-        sku: newProduct.sku || `SKU-${Date.now()}`,
-        images: newProduct.images || [],
-        tags: newProduct.tags || [],
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-        sales: 0,
-        revenue: 0,
-        rating: 0,
-        reviews: 0
-      }
-      setProducts([...products, product])
-      setNewProduct({
-        name: "",
-        description: "",
-        price: 0,
-        category: "",
-        status: "draft",
-        inventory: 0,
-        sku: "",
-        tags: [],
-        images: []
-      })
-      setIsCreateDialogOpen(false)
+      // Simulate loading
+      setIsLoading(true)
+      setTimeout(() => {
+        const product: Product = {
+          id: Date.now().toString(),
+          name: newProduct.name || "",
+          description: newProduct.description || "",
+          price: newProduct.price || 0,
+          category: newProduct.category || "",
+          status: "draft",
+          inventory: 0,
+          sku: newProduct.sku || `PROD-${Date.now()}`,
+          tags: [],
+          images: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          sales: 0,
+          revenue: 0,
+          rating: 0,
+          reviews: 0
+        }
+        setProducts([...products, product])
+        setNewProduct({
+          name: "",
+          description: "",
+          price: 0,
+          category: "",
+          status: "draft",
+          inventory: 0,
+          sku: "",
+          tags: [],
+          images: []
+        })
+        setIsLoading(false)
+        setIsCreateDialogOpen(false)
+      }, 1000)
     }
   }
 
@@ -213,6 +220,37 @@ export default function ProductsPage() {
     if (inventory < 10) return <Badge variant="secondary">Low Stock</Badge>
     return <Badge variant="default">In Stock</Badge>
   }
+
+  const ProductSkeleton = () => (
+    <Card className="flex flex-col h-[600px]">
+      <div className="relative">
+        <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+          <Loader2 className="w-8 h-8 text-gray-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+        </div>
+      </div>
+      <CardContent className="p-4 space-y-4 flex flex-col h-full">
+        <div className="space-y-2 flex-shrink-0">
+          <div className="h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="flex items-center justify-between flex-shrink-0">
+          <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+          <div className="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 text-sm flex-shrink-0">
+          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+        </div>
+        <div className="flex flex-wrap gap-1 flex-shrink-0">
+          <div className="h-5 bg-gray-200 rounded w-12 animate-pulse"></div>
+          <div className="h-5 bg-gray-200 rounded w-12 animate-pulse"></div>
+        </div>
+        <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
+          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0)
   const totalSales = products.reduce((sum, p) => sum + p.sales, 0)
@@ -428,7 +466,13 @@ export default function ProductsPage() {
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          {viewMode === "grid" ? (
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          ) : viewMode === "grid" ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
@@ -625,7 +669,13 @@ export default function ProductsPage() {
         </TabsContent>
 
         <TabsContent value="active" className="space-y-4">
-          {viewMode === "grid" ? (
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          ) : viewMode === "grid" ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
@@ -832,7 +882,13 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
-              {viewMode === "grid" ? (
+              {isLoading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <ProductSkeleton key={i} />
+                  ))}
+                </div>
+              ) : viewMode === "grid" ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredProducts.map((product) => (
                     <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
@@ -1041,7 +1097,13 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
-              {viewMode === "grid" ? (
+              {isLoading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <ProductSkeleton key={i} />
+                  ))}
+                </div>
+              ) : viewMode === "grid" ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredProducts.map((product) => (
                     <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
