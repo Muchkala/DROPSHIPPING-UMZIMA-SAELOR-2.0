@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Lato, Roboto } from "next/font/google";
 import "./globals.css";
 import { ChildProps } from "./types";
-import { ThemeProvider } from "./components/providers/theme-provider";
+import { ThemeProvider } from "./@components/providers/theme-provider";
 const roboto = Roboto({
   weight: ['100', '200', '400', '500', '600', '700', '800', '900'],
   subsets: ['latin'],
