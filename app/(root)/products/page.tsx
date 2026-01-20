@@ -19,8 +19,6 @@ import {
   MoreHorizontal, 
   Edit, 
   Trash2, 
-  Eye, 
-  Copy, 
   Download,
   Upload,
   Package,
@@ -39,7 +37,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Minus,
-  Archive
+  Archive,
+  ImageOff,
+  Loader2
 } from "lucide-react"
 
 interface Product {
@@ -64,10 +64,11 @@ interface Product {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
+  const [activeTab, setActiveTab] = useState("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: "",
@@ -89,14 +90,14 @@ export default function ProductsPage() {
     const sampleProducts: Product[] = [
       {
         id: "1",
-        name: "Wireless Bluetooth Headphones",
-        description: "Premium noise-cancelling headphones with 30-hour battery life",
+        name: "Wireless Bluetooth Headphones Premium Noise-Cancelling Headphones with Extended Battery Life",
+        description: "Experience premium sound quality with these advanced wireless headphones featuring industry-leading noise cancellation technology and 30-hour battery life for uninterrupted listening pleasure.",
         price: 199.99,
         category: "Electronics",
         status: "active",
         inventory: 45,
         sku: "WBH-001",
-        images: ["/api/placeholder/300/300"],
+        images: [],
         tags: ["wireless", "bluetooth", "noise-cancelling"],
         createdAt: "2024-01-15",
         updatedAt: "2024-01-20",
@@ -107,14 +108,14 @@ export default function ProductsPage() {
       },
       {
         id: "2",
-        name: "Organic Cotton T-Shirt",
-        description: "Sustainable and comfortable everyday wear",
+        name: "Organic Cotton T-Shirt Sustainable Comfortable Everyday Wear Essential",
+        description: "Made from 100% organic cotton, this comfortable t-shirt is perfect for everyday wear. Sustainable fashion that feels good on your skin and good for the planet.",
         price: 29.99,
         category: "Clothing",
         status: "active",
         inventory: 120,
         sku: "OCT-002",
-        images: ["/api/placeholder/300/300"],
+        images: [],
         tags: ["organic", "cotton", "sustainable"],
         createdAt: "2024-01-10",
         updatedAt: "2024-01-18",
@@ -125,14 +126,14 @@ export default function ProductsPage() {
       },
       {
         id: "3",
-        name: "Smart Home Security Camera",
-        description: "1080p HD camera with night vision and motion detection",
+        name: "Smart Home Security Camera 1080p HD Night Vision Motion Detection",
+        description: "Advanced security camera with crystal clear 1080p HD video quality, enhanced night vision capabilities, and intelligent motion detection for comprehensive home monitoring.",
         price: 89.99,
         category: "Electronics",
         status: "draft",
         inventory: 0,
         sku: "SHC-003",
-        images: ["/api/placeholder/300/300"],
+        images: [],
         tags: ["smart home", "security", "wifi"],
         createdAt: "2024-01-22",
         updatedAt: "2024-01-22",
@@ -149,44 +150,48 @@ export default function ProductsPage() {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.sku.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
-    return matchesSearch && matchesCategory && matchesStatus
+    const matchesStatus = activeTab === "all" || product.status === activeTab
+    return matchesSearch && matchesStatus
   })
 
   const handleCreateProduct = () => {
     if (newProduct.name && newProduct.price && newProduct.category) {
-      const product: Product = {
-        id: Date.now().toString(),
-        name: newProduct.name,
-        description: newProduct.description || "",
-        price: newProduct.price,
-        category: newProduct.category,
-        status: newProduct.status as 'active' | 'draft' | 'archived',
-        inventory: newProduct.inventory || 0,
-        sku: newProduct.sku || `SKU-${Date.now()}`,
-        images: newProduct.images || [],
-        tags: newProduct.tags || [],
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-        sales: 0,
-        revenue: 0,
-        rating: 0,
-        reviews: 0
-      }
-      setProducts([...products, product])
-      setNewProduct({
-        name: "",
-        description: "",
-        price: 0,
-        category: "",
-        status: "draft",
-        inventory: 0,
-        sku: "",
-        tags: [],
-        images: []
-      })
-      setIsCreateDialogOpen(false)
+      // Simulate loading
+      setIsLoading(true)
+      setTimeout(() => {
+        const product: Product = {
+          id: Date.now().toString(),
+          name: newProduct.name || "",
+          description: newProduct.description || "",
+          price: newProduct.price || 0,
+          category: newProduct.category || "",
+          status: "draft",
+          inventory: 0,
+          sku: newProduct.sku || `PROD-${Date.now()}`,
+          tags: [],
+          images: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          sales: 0,
+          revenue: 0,
+          rating: 0,
+          reviews: 0
+        }
+        setProducts([...products, product])
+        setNewProduct({
+          name: "",
+          description: "",
+          price: 0,
+          category: "",
+          status: "draft",
+          inventory: 0,
+          sku: "",
+          tags: [],
+          images: []
+        })
+        setIsLoading(false)
+        setIsCreateDialogOpen(false)
+      }, 1000)
     }
   }
 
@@ -215,6 +220,37 @@ export default function ProductsPage() {
     if (inventory < 10) return <Badge variant="secondary">Low Stock</Badge>
     return <Badge variant="default">In Stock</Badge>
   }
+
+  const ProductSkeleton = () => (
+    <Card className="flex flex-col h-[600px]">
+      <div className="relative">
+        <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+          <Loader2 className="w-8 h-8 text-gray-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+        </div>
+      </div>
+      <CardContent className="p-4 space-y-4 flex flex-col h-full">
+        <div className="space-y-2 flex-shrink-0">
+          <div className="h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="flex items-center justify-between flex-shrink-0">
+          <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+          <div className="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 text-sm flex-shrink-0">
+          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+        </div>
+        <div className="flex flex-wrap gap-1 flex-shrink-0">
+          <div className="h-5 bg-gray-200 rounded w-12 animate-pulse"></div>
+          <div className="h-5 bg-gray-200 rounded w-12 animate-pulse"></div>
+        </div>
+        <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
+          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0)
   const totalSales = products.reduce((sum, p) => sum + p.sales, 0)
@@ -386,9 +422,9 @@ export default function ProductsPage() {
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-2 flex-1">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search products..."
               value={searchQuery}
@@ -396,17 +432,6 @@ export default function ProductsPage() {
               className="pl-10"
             />
           </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map(category => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Status" />
@@ -428,15 +453,11 @@ export default function ProductsPage() {
           >
             {viewMode === "grid" ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
         </div>
       </div>
 
       {/* Products Display */}
-      <Tabs defaultValue="all" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="all">All Products ({products.length})</TabsTrigger>
           <TabsTrigger value="active">Active ({activeProducts})</TabsTrigger>
@@ -445,26 +466,38 @@ export default function ProductsPage() {
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          {viewMode === "grid" ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden">
-                  <div className="aspect-square bg-muted relative">
-                    <img
-                      src={product.images[0] || "/api/placeholder/300/300"}
-                      alt={product.name}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute top-2 right-2">
+                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                  <div className="relative">
+                    <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+                      {product.images[0] ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300">
+                          <Package className="h-12 w-12 text-gray-400 mb-2" />
+                          <span className="text-sm text-gray-500">No Image</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute top-3 right-3">
                       {getStatusBadge(product.status)}
                     </div>
-                  </div>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{product.name}</CardTitle>
+                    <div className="absolute top-3 left-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -472,14 +505,6 @@ export default function ProductsPage() {
                           <DropdownMenuItem onClick={() => setEditingProduct(product)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Copy className="mr-2 h-4 w-4" />
-                            Duplicate
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-destructive"
@@ -491,36 +516,63 @@ export default function ProductsPage() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <CardDescription className="line-clamp-2">
-                      {product.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold">${product.price}</span>
+                  </div>
+                  
+                  <CardContent className="p-4 space-y-4 flex flex-col h-full">
+                    {/* Product Title and Description */}
+                    <div className="space-y-2 flex-shrink-0">
+                      <h3 className="font-semibold text-lg leading-tight text-ellipsis overflow-hidden whitespace-nowrap" title={product.name}>{product.name}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 overflow-hidden" title={product.description}>{product.description}</p>
+                    </div>
+                    
+                    {/* Price and Inventory */}
+                    <div className="flex items-center justify-between flex-shrink-0">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-primary">${product.price}</span>
+                      </div>
                       {getInventoryStatus(product.inventory)}
                     </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>SKU: {product.sku}</span>
-                      <span>{product.sales} sold</span>
+                    
+                    {/* Product Meta Info */}
+                    <div className="grid grid-cols-2 gap-4 text-sm flex-shrink-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground flex-shrink-0">SKU:</span>
+                        <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
+                      </div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground flex-shrink-0">Sold:</span>
+                        <span className="font-medium">{product.sales}</span>
+                      </div>
                     </div>
-                    <div className="flex gap-1 flex-wrap">
-                      {product.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {product.tags.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{product.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span>{product.rating.toFixed(1)}</span>
-                      <span className="text-muted-foreground">({product.reviews} reviews)</span>
-                    </div>
+                    
+                    {/* Tags */}
+                    {product.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 flex-shrink-0">
+                        {product.tags.slice(0, 2).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs max-w-[80px] truncate" title={tag}>
+                            {tag}
+                          </Badge>
+                        ))}
+                        {product.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{product.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Rating */}
+                    {product.rating > 0 && (
+                      <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
+                        <div className="flex items-center flex-shrink-0">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
+                        </div>
+                        <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -548,11 +600,17 @@ export default function ProductsPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-md bg-muted overflow-hidden">
-                            <img
-                              src={product.images[0] || "/api/placeholder/40/40"}
-                              alt={product.name}
-                              className="object-cover w-full h-full"
-                            />
+                            {product.images[0] ? (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200">
+                                <Package className="h-5 w-5 text-gray-400" />
+                              </div>
+                            )}
                           </div>
                           <div>
                             <div className="font-medium">{product.name}</div>
@@ -592,13 +650,208 @@ export default function ProductsPage() {
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View
+                            <DropdownMenuItem 
+                              className="text-destructive"
+                              onClick={() => handleDeleteProduct(product.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Copy className="mr-2 h-4 w-4" />
-                              Duplicate
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="active" className="space-y-4">
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredProducts.map((product) => (
+                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                  <div className="relative">
+                    <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+                      {product.images[0] ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300">
+                          <Package className="h-12 w-12 text-gray-400 mb-2" />
+                          <span className="text-sm text-gray-500">No Image</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute top-3 right-3">
+                      {getStatusBadge(product.status)}
+                    </div>
+                    <div className="absolute top-3 left-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => handleDeleteProduct(product.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                  
+                  <CardContent className="p-4 space-y-4 flex flex-col h-full">
+                    {/* Product Title and Description */}
+                    <div className="space-y-2 flex-shrink-0">
+                      <h3 className="font-semibold text-lg leading-tight text-ellipsis overflow-hidden whitespace-nowrap" title={product.name}>{product.name}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 overflow-hidden" title={product.description}>{product.description}</p>
+                    </div>
+                    
+                    {/* Price and Inventory */}
+                    <div className="flex items-center justify-between flex-shrink-0">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-primary">${product.price}</span>
+                      </div>
+                      {getInventoryStatus(product.inventory)}
+                    </div>
+                    
+                    {/* Product Meta Info */}
+                    <div className="grid grid-cols-2 gap-4 text-sm flex-shrink-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground flex-shrink-0">SKU:</span>
+                        <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
+                      </div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground flex-shrink-0">Sold:</span>
+                        <span className="font-medium">{product.sales}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Tags */}
+                    {product.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 flex-shrink-0">
+                        {product.tags.slice(0, 2).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs max-w-[80px] truncate" title={tag}>
+                            {tag}
+                          </Badge>
+                        ))}
+                        {product.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{product.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Rating */}
+                    {product.rating > 0 && (
+                      <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
+                        <div className="flex items-center flex-shrink-0">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
+                        </div>
+                        <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Inventory</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Sales</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Rating</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-md bg-muted overflow-hidden">
+                            {product.images[0] ? (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200">
+                                <Package className="h-5 w-5 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-sm text-muted-foreground line-clamp-1">
+                              {product.description}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{product.sku}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span>{product.inventory}</span>
+                          {getInventoryStatus(product.inventory)}
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(product.status)}</TableCell>
+                      <TableCell>{product.sales}</TableCell>
+                      <TableCell>${product.revenue.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span>{product.rating.toFixed(1)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="text-destructive"
@@ -618,34 +871,434 @@ export default function ProductsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="active">
-          <div className="text-center py-8">
-            <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-lg font-semibold">Active Products</h3>
-            <p className="text-muted-foreground">
-              {filteredProducts.filter(p => p.status === 'active').length} products currently live
-            </p>
-          </div>
+        <TabsContent value="draft" className="space-y-4">
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-lg font-semibold">No Draft Products</h3>
+              <p className="text-muted-foreground">
+                No products in draft status
+              </p>
+            </div>
+          ) : (
+            <>
+              {isLoading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <ProductSkeleton key={i} />
+                  ))}
+                </div>
+              ) : viewMode === "grid" ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredProducts.map((product) => (
+                    <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                      <div className="relative">
+                        <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+                          {product.images[0] ? (
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300">
+                              <Package className="h-12 w-12 text-gray-400 mb-2" />
+                              <span className="text-sm text-gray-500">No Image</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute top-3 right-3">
+                          {getStatusBadge(product.status)}
+                        </div>
+                        <div className="absolute top-3 left-3">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => handleDeleteProduct(product.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-4 space-y-4 flex flex-col h-full">
+                        {/* Product Title and Description */}
+                        <div className="space-y-2 flex-shrink-0">
+                          <h3 className="font-semibold text-lg leading-tight text-ellipsis overflow-hidden whitespace-nowrap" title={product.name}>{product.name}</h3>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 overflow-hidden" title={product.description}>{product.description}</p>
+                        </div>
+                        
+                        {/* Price and Inventory */}
+                        <div className="flex items-center justify-between flex-shrink-0">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-primary">${product.price}</span>
+                          </div>
+                          {getInventoryStatus(product.inventory)}
+                        </div>
+                        
+                        {/* Product Meta Info */}
+                        <div className="grid grid-cols-2 gap-4 text-sm flex-shrink-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-muted-foreground flex-shrink-0">SKU:</span>
+                            <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
+                          </div>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-muted-foreground flex-shrink-0">Sold:</span>
+                            <span className="font-medium">{product.sales}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Tags */}
+                        {product.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 flex-shrink-0">
+                            {product.tags.slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs max-w-[80px] truncate" title={tag}>
+                                {tag}
+                              </Badge>
+                            ))}
+                            {product.tags.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{product.tags.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Rating */}
+                        {product.rating > 0 && (
+                          <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
+                            <div className="flex items-center flex-shrink-0">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
+                            </div>
+                            <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>SKU</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Inventory</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Sales</TableHead>
+                        <TableHead>Revenue</TableHead>
+                        <TableHead>Rating</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-md bg-muted overflow-hidden">
+                                {product.images[0] ? (
+                                  <img
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    className="object-cover w-full h-full"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200">
+                                    <Package className="h-5 w-5 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <div className="font-medium">{product.name}</div>
+                                <div className="text-sm text-muted-foreground line-clamp-1">
+                                  {product.description}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">{product.sku}</TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell>${product.price.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span>{product.inventory}</span>
+                              {getInventoryStatus(product.inventory)}
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(product.status)}</TableCell>
+                          <TableCell>{product.sales}</TableCell>
+                          <TableCell>${product.revenue.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span>{product.rating.toFixed(1)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              )}
+            </>
+          )}
         </TabsContent>
 
-        <TabsContent value="draft">
-          <div className="text-center py-8">
-            <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-lg font-semibold">Draft Products</h3>
-            <p className="text-muted-foreground">
-              {filteredProducts.filter(p => p.status === 'draft').length} products in draft
-            </p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="archived">
-          <div className="text-center py-8">
-            <Archive className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-lg font-semibold">Archived Products</h3>
-            <p className="text-muted-foreground">
-              {filteredProducts.filter(p => p.status === 'archived').length} products archived
-            </p>
-          </div>
+        <TabsContent value="archived" className="space-y-4">
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <Archive className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-lg font-semibold">No Archived Products</h3>
+              <p className="text-muted-foreground">
+                No products in archived status
+              </p>
+            </div>
+          ) : (
+            <>
+              {isLoading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <ProductSkeleton key={i} />
+                  ))}
+                </div>
+              ) : viewMode === "grid" ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredProducts.map((product) => (
+                    <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                      <div className="relative">
+                        <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+                          {product.images[0] ? (
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300">
+                              <Package className="h-12 w-12 text-gray-400 mb-2" />
+                              <span className="text-sm text-gray-500">No Image</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute top-3 right-3">
+                          {getStatusBadge(product.status)}
+                        </div>
+                        <div className="absolute top-3 left-3">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => handleDeleteProduct(product.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-4 space-y-4 flex flex-col h-full">
+                        {/* Product Title and Description */}
+                        <div className="space-y-2 flex-shrink-0">
+                          <h3 className="font-semibold text-lg leading-tight text-ellipsis overflow-hidden whitespace-nowrap" title={product.name}>{product.name}</h3>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 overflow-hidden" title={product.description}>{product.description}</p>
+                        </div>
+                        
+                        {/* Price and Inventory */}
+                        <div className="flex items-center justify-between flex-shrink-0">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-primary">${product.price}</span>
+                          </div>
+                          {getInventoryStatus(product.inventory)}
+                        </div>
+                        
+                        {/* Product Meta Info */}
+                        <div className="grid grid-cols-2 gap-4 text-sm flex-shrink-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-muted-foreground flex-shrink-0">SKU:</span>
+                            <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
+                          </div>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-muted-foreground flex-shrink-0">Sold:</span>
+                            <span className="font-medium">{product.sales}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Tags */}
+                        {product.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 flex-shrink-0">
+                            {product.tags.slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs max-w-[80px] truncate" title={tag}>
+                                {tag}
+                              </Badge>
+                            ))}
+                            {product.tags.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{product.tags.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Rating */}
+                        {product.rating > 0 && (
+                          <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
+                            <div className="flex items-center flex-shrink-0">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
+                            </div>
+                            <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>SKU</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Inventory</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Sales</TableHead>
+                        <TableHead>Revenue</TableHead>
+                        <TableHead>Rating</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-md bg-muted overflow-hidden">
+                                {product.images[0] ? (
+                                  <img
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    className="object-cover w-full h-full"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200">
+                                    <Package className="h-5 w-5 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <div className="font-medium">{product.name}</div>
+                                <div className="text-sm text-muted-foreground line-clamp-1">
+                                  {product.description}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">{product.sku}</TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell>${product.price.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span>{product.inventory}</span>
+                              {getInventoryStatus(product.inventory)}
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(product.status)}</TableCell>
+                          <TableCell>{product.sales}</TableCell>
+                          <TableCell>${product.revenue.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span>{product.rating.toFixed(1)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              )}
+            </>
+          )}
         </TabsContent>
       </Tabs>
 

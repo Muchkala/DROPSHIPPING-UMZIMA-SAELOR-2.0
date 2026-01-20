@@ -1,6 +1,6 @@
 "use client"
 
-import DarkToggle from "@/app/components/DarkToggle";
+import DarkToggle from "@/app/@components/DarkToggle";
 import { NavbarUser } from "@/components/navbar-user";
 
 export default function Navbar() {
