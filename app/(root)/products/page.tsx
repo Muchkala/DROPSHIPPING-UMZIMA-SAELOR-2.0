@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -62,9 +63,9 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
   const [activeTab, setActiveTab] = useState("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -81,6 +82,10 @@ export default function ProductsPage() {
     tags: [],
     images: []
   })
+
+  const handleProductClick = (productId: string) => {
+    router.push(`/creator/products/${productId}`)
+  }
 
   const categories = ["Electronics", "Clothing", "Home & Garden", "Sports", "Books", "Toys", "Beauty", "Food"]
   const statuses = ["all", "active", "draft", "archived"]
@@ -310,7 +315,7 @@ export default function ProductsPage() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price</Label>
                   <Input
@@ -331,19 +336,6 @@ export default function ProductsPage() {
                     onChange={(e) => setNewProduct({...newProduct, inventory: parseInt(e.target.value) || 0})}
                     placeholder="0"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
               <div className="space-y-2">
@@ -422,28 +414,14 @@ export default function ProductsPage() {
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-full sm:w-[140px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {statuses.map(status => (
-                <SelectItem key={status} value={status}>
-                  {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
         <div className="flex gap-2">
           <Button
@@ -475,7 +453,7 @@ export default function ProductsPage() {
           ) : viewMode === "grid" ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px] cursor-pointer" onClick={() => handleProductClick(product.id)}>
                   <div className="relative">
                     <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                       {product.images[0] ? (
@@ -494,21 +472,21 @@ export default function ProductsPage() {
                     <div className="absolute top-3 right-3">
                       {getStatusBadge(product.status)}
                     </div>
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="h-4 w-4 dark:text-black" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProduct(product) }}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-destructive"
-                            onClick={() => handleDeleteProduct(product.id)}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id) }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -584,14 +562,12 @@ export default function ProductsPage() {
                   <TableRow>
                     <TableHead>Product</TableHead>
                     <TableHead>SKU</TableHead>
-                    <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Inventory</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Sales</TableHead>
                     <TableHead>Revenue</TableHead>
                     <TableHead>Rating</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -621,7 +597,6 @@ export default function ProductsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                      <TableCell>{product.category}</TableCell>
                       <TableCell>${product.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -637,28 +612,6 @@ export default function ProductsPage() {
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           <span>{product.rating.toFixed(1)}</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditingProduct(product)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-destructive"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -678,7 +631,7 @@ export default function ProductsPage() {
           ) : viewMode === "grid" ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px] cursor-pointer" onClick={() => handleProductClick(product.id)}>
                   <div className="relative">
                     <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                       {product.images[0] ? (
@@ -697,7 +650,7 @@ export default function ProductsPage() {
                     <div className="absolute top-3 right-3">
                       {getStatusBadge(product.status)}
                     </div>
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
@@ -705,13 +658,13 @@ export default function ProductsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProduct(product) }}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-destructive"
-                            onClick={() => handleDeleteProduct(product.id)}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id) }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -787,14 +740,12 @@ export default function ProductsPage() {
                   <TableRow>
                     <TableHead>Product</TableHead>
                     <TableHead>SKU</TableHead>
-                    <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Inventory</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Sales</TableHead>
                     <TableHead>Revenue</TableHead>
                     <TableHead>Rating</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -824,7 +775,6 @@ export default function ProductsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                      <TableCell>{product.category}</TableCell>
                       <TableCell>${product.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -840,28 +790,6 @@ export default function ProductsPage() {
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           <span>{product.rating.toFixed(1)}</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditingProduct(product)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-destructive"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -891,7 +819,7 @@ export default function ProductsPage() {
               ) : viewMode === "grid" ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredProducts.map((product) => (
-                    <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                    <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px] cursor-pointer" onClick={() => handleProductClick(product.id)}>
                       <div className="relative">
                         <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                           {product.images[0] ? (
@@ -910,7 +838,7 @@ export default function ProductsPage() {
                         <div className="absolute top-3 right-3">
                           {getStatusBadge(product.status)}
                         </div>
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
@@ -918,13 +846,13 @@ export default function ProductsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProduct(product) }}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-destructive"
-                                onClick={() => handleDeleteProduct(product.id)}
+                                onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id) }}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
@@ -1106,7 +1034,7 @@ export default function ProductsPage() {
               ) : viewMode === "grid" ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredProducts.map((product) => (
-                    <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]">
+                    <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px] cursor-pointer" onClick={() => handleProductClick(product.id)}>
                       <div className="relative">
                         <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                           {product.images[0] ? (
@@ -1125,7 +1053,7 @@ export default function ProductsPage() {
                         <div className="absolute top-3 right-3">
                           {getStatusBadge(product.status)}
                         </div>
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-md border border-gray-200">
@@ -1133,13 +1061,13 @@ export default function ProductsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProduct(product) }}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-destructive"
-                                onClick={() => handleDeleteProduct(product.id)}
+                                onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id) }}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
@@ -1340,7 +1268,7 @@ export default function ProductsPage() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-price">Price</Label>
                   <Input
@@ -1359,19 +1287,6 @@ export default function ProductsPage() {
                     value={editingProduct.inventory}
                     onChange={(e) => setEditingProduct({...editingProduct, inventory: parseInt(e.target.value) || 0})}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-category">Category</Label>
-                  <Select value={editingProduct.category} onValueChange={(value) => setEditingProduct({...editingProduct, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
               <div className="space-y-2">
