@@ -3,6 +3,7 @@ import { Lato, Roboto } from "next/font/google";
 import "./globals.css";
 import { ChildProps } from "./types";
 import { ThemeProvider } from "./@components/providers/theme-provider";
+import { AuthProvider } from "./@components/providers/auth-provider";
 const roboto = Roboto({
   weight: ['100', '200', '400', '500', '600', '700', '800', '900'],
   subsets: ['latin'],
@@ -32,7 +33,7 @@ export default function RootLayout({ children }: ChildProps) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>
