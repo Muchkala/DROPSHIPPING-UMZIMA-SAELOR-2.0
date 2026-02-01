@@ -16,30 +16,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { 
   Plus, 
   Search, 
-  Filter, 
   MoreHorizontal, 
   Edit, 
   Trash2, 
-  Download,
-  Upload,
   Package,
-  TrendingUp,
-  DollarSign,
-  Users,
-  ShoppingCart,
-  BarChart3,
-  Settings,
   Grid3X3,
   List,
-  Star,
-  AlertCircle,
-  CheckCircle,
   Clock,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus,
   Archive,
-  ImageOff,
   Loader2
 } from "lucide-react"
 
@@ -56,10 +40,6 @@ interface Product {
   tags: string[]
   createdAt: string
   updatedAt: string
-  sales: number
-  revenue: number
-  rating: number
-  reviews: number
 }
 
 export default function ProductsPage() {
@@ -106,10 +86,6 @@ export default function ProductsPage() {
         tags: ["wireless", "bluetooth", "noise-cancelling"],
         createdAt: "2024-01-15",
         updatedAt: "2024-01-20",
-        sales: 128,
-        revenue: 25598.72,
-        rating: 4.5,
-        reviews: 89
       },
       {
         id: "2",
@@ -124,10 +100,6 @@ export default function ProductsPage() {
         tags: ["organic", "cotton", "sustainable"],
         createdAt: "2024-01-10",
         updatedAt: "2024-01-18",
-        sales: 256,
-        revenue: 7677.44,
-        rating: 4.8,
-        reviews: 156
       },
       {
         id: "3",
@@ -142,10 +114,6 @@ export default function ProductsPage() {
         tags: ["smart home", "security", "wifi"],
         createdAt: "2024-01-22",
         updatedAt: "2024-01-22",
-        sales: 0,
-        revenue: 0,
-        rating: 0,
-        reviews: 0
       }
     ]
     setProducts(sampleProducts)
@@ -177,10 +145,6 @@ export default function ProductsPage() {
           images: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          sales: 0,
-          revenue: 0,
-          rating: 0,
-          reviews: 0
         }
         setProducts([...products, product])
         setNewProduct({
@@ -257,10 +221,7 @@ export default function ProductsPage() {
     </Card>
   )
 
-  const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0)
-  const totalSales = products.reduce((sum, p) => sum + p.sales, 0)
   const activeProducts = products.filter(p => p.status === 'active').length
-  const averageRating = products.filter(p => p.rating > 0).reduce((sum, p) => sum + p.rating, 0) / products.filter(p => p.rating > 0).length || 0
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -268,7 +229,7 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">Manage your product inventory and sales</p>
+          <p className="text-muted-foreground">Manage your products</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -361,56 +322,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+12.5%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalSales}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+8.2%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-blue-600">{products.length - activeProducts} in draft</span>
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{averageRating.toFixed(1)}</div>
-            <p className="text-xs text-muted-foreground">
-              Based on {products.reduce((sum, p) => sum + p.reviews, 0)} reviews
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      {null}
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -519,9 +431,8 @@ export default function ProductsPage() {
                         <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
                       </div>
                       <div className="flex items-center gap-2 min-w-0">
-                        <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground flex-shrink-0">Sold:</span>
-                        <span className="font-medium">{product.sales}</span>
+                        <span className="text-muted-foreground flex-shrink-0">Category:</span>
+                        <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.category}>{product.category}</span>
                       </div>
                     </div>
                     
@@ -541,16 +452,7 @@ export default function ProductsPage() {
                       </div>
                     )}
                     
-                    {/* Rating */}
-                    {product.rating > 0 && (
-                      <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
-                        <div className="flex items-center flex-shrink-0">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
-                        </div>
-                        <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
-                      </div>
-                    )}
+                    {null}
                   </CardContent>
                 </Card>
               ))}
@@ -565,9 +467,6 @@ export default function ProductsPage() {
                     <TableHead>Price</TableHead>
                     <TableHead>Inventory</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Sales</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Rating</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -605,14 +504,6 @@ export default function ProductsPage() {
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell>{product.sales}</TableCell>
-                      <TableCell>${product.revenue.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{product.rating.toFixed(1)}</span>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -697,9 +588,8 @@ export default function ProductsPage() {
                         <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
                       </div>
                       <div className="flex items-center gap-2 min-w-0">
-                        <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground flex-shrink-0">Sold:</span>
-                        <span className="font-medium">{product.sales}</span>
+                        <span className="text-muted-foreground flex-shrink-0">Category:</span>
+                        <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.category}>{product.category}</span>
                       </div>
                     </div>
                     
@@ -719,16 +609,7 @@ export default function ProductsPage() {
                       </div>
                     )}
                     
-                    {/* Rating */}
-                    {product.rating > 0 && (
-                      <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
-                        <div className="flex items-center flex-shrink-0">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
-                        </div>
-                        <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
-                      </div>
-                    )}
+                    {null}
                   </CardContent>
                 </Card>
               ))}
@@ -743,9 +624,6 @@ export default function ProductsPage() {
                     <TableHead>Price</TableHead>
                     <TableHead>Inventory</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Sales</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Rating</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -783,14 +661,6 @@ export default function ProductsPage() {
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell>{product.sales}</TableCell>
-                      <TableCell>${product.revenue.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{product.rating.toFixed(1)}</span>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -885,9 +755,8 @@ export default function ProductsPage() {
                             <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
                           </div>
                           <div className="flex items-center gap-2 min-w-0">
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-muted-foreground flex-shrink-0">Sold:</span>
-                            <span className="font-medium">{product.sales}</span>
+                            <span className="text-muted-foreground flex-shrink-0">Category:</span>
+                            <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.category}>{product.category}</span>
                           </div>
                         </div>
                         
@@ -907,16 +776,7 @@ export default function ProductsPage() {
                           </div>
                         )}
                         
-                        {/* Rating */}
-                        {product.rating > 0 && (
-                          <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
-                            <div className="flex items-center flex-shrink-0">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
-                            </div>
-                            <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
-                          </div>
-                        )}
+                        {null}
                       </CardContent>
                     </Card>
                   ))}
@@ -932,9 +792,6 @@ export default function ProductsPage() {
                         <TableHead>Price</TableHead>
                         <TableHead>Inventory</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Sales</TableHead>
-                        <TableHead>Revenue</TableHead>
-                        <TableHead>Rating</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -974,14 +831,6 @@ export default function ProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell>{getStatusBadge(product.status)}</TableCell>
-                          <TableCell>{product.sales}</TableCell>
-                          <TableCell>${product.revenue.toFixed(2)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span>{product.rating.toFixed(1)}</span>
-                            </div>
-                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -1100,9 +949,8 @@ export default function ProductsPage() {
                             <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.sku}>{product.sku}</span>
                           </div>
                           <div className="flex items-center gap-2 min-w-0">
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-muted-foreground flex-shrink-0">Sold:</span>
-                            <span className="font-medium">{product.sales}</span>
+                            <span className="text-muted-foreground flex-shrink-0">Category:</span>
+                            <span className="font-medium text-ellipsis overflow-hidden whitespace-nowrap" title={product.category}>{product.category}</span>
                           </div>
                         </div>
                         
@@ -1122,16 +970,7 @@ export default function ProductsPage() {
                           </div>
                         )}
                         
-                        {/* Rating */}
-                        {product.rating > 0 && (
-                          <div className="flex items-center gap-2 text-sm border-t pt-3 mt-auto flex-shrink-0">
-                            <div className="flex items-center flex-shrink-0">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-medium ml-1">{product.rating.toFixed(1)}</span>
-                            </div>
-                            <span className="text-muted-foreground truncate" title={`${product.reviews} reviews`}>({product.reviews} reviews)</span>
-                          </div>
-                        )}
+                        {null}
                       </CardContent>
                     </Card>
                   ))}
@@ -1147,9 +986,6 @@ export default function ProductsPage() {
                         <TableHead>Price</TableHead>
                         <TableHead>Inventory</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Sales</TableHead>
-                        <TableHead>Revenue</TableHead>
-                        <TableHead>Rating</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -1189,14 +1025,6 @@ export default function ProductsPage() {
                             </div>
                           </TableCell>
                           <TableCell>{getStatusBadge(product.status)}</TableCell>
-                          <TableCell>{product.sales}</TableCell>
-                          <TableCell>${product.revenue.toFixed(2)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span>{product.rating.toFixed(1)}</span>
-                            </div>
-                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

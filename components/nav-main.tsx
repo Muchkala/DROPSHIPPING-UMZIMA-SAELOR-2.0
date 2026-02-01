@@ -16,6 +16,7 @@ import {
 
 export function NavMain({
   items,
+  label,
 }: {
   items: {
     title: string
@@ -27,12 +28,13 @@ export function NavMain({
       url: string
     }[]
   }[]
+  label?: string
 }) {
   const pathname = usePathname()
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      {label?.trim() ? <SidebarGroupLabel>{label}</SidebarGroupLabel> : null}
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
