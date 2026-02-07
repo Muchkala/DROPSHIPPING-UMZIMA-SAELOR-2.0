@@ -1,12 +1,15 @@
 "use client"
 
+import Link from "next/link"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { User, Settings, LogOut } from "lucide-react"
 
 export function NavbarUser({
   user,
@@ -42,10 +45,22 @@ export function NavbarUser({
             </p>
           </div>
         </div>
-        <DropdownMenuItem>
-          <span>Account</span>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/creator/profile" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <span>Profile Settings</span>
+          </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/creator" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem>
+          <LogOut className="h-4 w-4 mr-2" />
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

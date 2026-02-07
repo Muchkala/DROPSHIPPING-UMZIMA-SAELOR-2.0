@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Home, Info, FileText, Archive, Mail, Package, MessageSquare } from "lucide-react"
+import { BarChart3, Package, MessageSquare } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
@@ -40,30 +40,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ]
       : [
           {
-            title: "Home",
-            url: "/",
-            icon: Home,
-            isActive: pathname === "/",
-          },
-          {
-            title: "About",
-            url: "/about",
-            icon: Info,
+            title: "Dashboard",
+            url: "/creator",
+            icon: BarChart3,
+            isActive: pathname === "/creator",
           },
           {
             title: "Products",
-            url: "/products",
-            icon: FileText,
-          },
-          {
-            title: "Archive",
-            url: "/archive",
-            icon: Archive,
-          },
-          {
-            title: "Contact",
-            url: "/contact",
-            icon: Mail,
+            url: "/creator/products",
+            icon: Package,
+            isActive: pathname.startsWith("/creator/products"),
           },
         ],
   }
@@ -74,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} label={productContext ? "" : "Platform"} />
+        <NavMain items={data.navMain} label={productContext ? "" : "Creator"} />
       </SidebarContent>
     </Sidebar>
   )
