@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BarChart3, Package, MessageSquare } from "lucide-react"
+import { BarChart3, Package, MessageSquare, ShoppingCart, Target, Headphones } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
@@ -50,6 +50,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             url: "/creator/products",
             icon: Package,
             isActive: pathname.startsWith("/creator/products"),
+          },
+          {
+            title: "Orders",
+            url: "/creator/orders",
+            icon: ShoppingCart,
+            isActive: pathname === "/creator/orders",
+          },
+          {
+            title: "Marketing",
+            url: "/creator/marketing",
+            icon: Target,
+            isActive: pathname === "/creator/marketing",
+          },
+          {
+            title: "Support",
+            url: "/creator/support",
+            icon: Headphones,
+            isActive: pathname === "/creator/support",
           },
         ],
   }

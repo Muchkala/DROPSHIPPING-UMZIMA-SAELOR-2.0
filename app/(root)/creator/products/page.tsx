@@ -24,7 +24,15 @@ import {
   List,
   Clock,
   Archive,
-  Loader2
+  Loader2,
+  CheckSquare,
+  Square,
+  Download,
+  Upload,
+  AlertTriangle,
+  TrendingUp,
+  Eye,
+  Copy
 } from "lucide-react"
 
 interface Product {
@@ -48,6 +56,7 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -65,6 +74,63 @@ export default function ProductsPage() {
 
   const handleProductClick = (productId: string) => {
     router.push(`/creator/products/${productId}`)
+  }
+
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProducts(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    const filteredProducts = products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           product.sku.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = activeTab === "all" || product.status === activeTab
+      return matchesSearch && matchesStatus
+    })
+    
+    const allSelected = filteredProducts.every(p => selectedProducts.includes(p.id))
+    setSelectedProducts(allSelected ? [] : filteredProducts.map(p => p.id))
+  }
+
+  const handleBulkAction = (action: string) => {
+    if (selectedProducts.length === 0) return
+    
+    switch (action) {
+      case "delete":
+        setProducts(prev => prev.filter(p => !selectedProducts.includes(p.id)))
+        setSelectedProducts([])
+        break
+      case "archive":
+        setProducts(prev => prev.map(p => 
+          selectedProducts.includes(p.id) ? { ...p, status: "archived" as const } : p
+        ))
+        setSelectedProducts([])
+        break
+      case "activate":
+        setProducts(prev => prev.map(p => 
+          selectedProducts.includes(p.id) ? { ...p, status: "active" as const } : p
+        ))
+        setSelectedProducts([])
+        break
+      case "duplicate":
+        const productsToDuplicate = products.filter(p => selectedProducts.includes(p.id))
+        const duplicated = productsToDuplicate.map(p => ({
+          ...p,
+          id: Date.now().toString() + Math.random(),
+          name: `${p.name} (Copy)`,
+          status: "draft" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }))
+        setProducts(prev => [...prev, ...duplicated])
+        setSelectedProducts([])
+        break
+    }
   }
 
   const categories = ["Electronics", "Clothing", "Home & Garden", "Sports", "Books", "Toys", "Beauty", "Food"]
