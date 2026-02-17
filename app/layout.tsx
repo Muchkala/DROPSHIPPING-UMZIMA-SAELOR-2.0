@@ -4,6 +4,9 @@ import "./globals.css";
 import { ChildProps } from "./types";
 import { ThemeProvider } from "./@components/providers/theme-provider";
 import { AuthProvider } from "./@components/providers/auth-provider";
+import { KeyboardShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
+import { FloatingShortcutsHint } from "@/components/floating-shortcuts-hint";
+import { Toaster } from "sonner";
 const roboto = Roboto({
   weight: ['100', '200', '400', '500', '600', '700', '800', '900'],
   subsets: ['latin'],
@@ -33,7 +36,13 @@ export default function RootLayout({ children }: ChildProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>{children}</AuthProvider>
+          <KeyboardShortcutsProvider>
+            <AuthProvider>
+              {children}
+              <Toaster position="top-right" />
+              <FloatingShortcutsHint />
+            </AuthProvider>
+          </KeyboardShortcutsProvider>
         </ThemeProvider>
       </body>
     </html>
