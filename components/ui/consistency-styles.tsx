@@ -112,16 +112,16 @@ export function ConsistentCard({
 export function ConsistentSection({ 
   children, 
   className,
-  spacing = "lg" 
+  spacingValue = "lg" 
 }: { 
   children: React.ReactNode
   className?: string
-  spacing?: keyof typeof spacing
+  spacingValue?: keyof typeof spacing
 }) {
   return (
     <section 
       className={cn("space-y-4", className)}
-      style={{ gap: getSpacing(spacing) }}
+      style={{ gap: getSpacing(spacingValue) }}
     >
       {children}
     </section>
