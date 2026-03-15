@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -64,6 +64,7 @@ export default function CreatorProfile() {
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [saveMessage, setSaveMessage] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     // Simulate API call
@@ -109,6 +110,39 @@ export default function CreatorProfile() {
     setSaveMessage("Password changed successfully!")
     
     setTimeout(() => setSaveMessage(""), 3000)
+  }
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Check file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setSaveMessage("File size must be less than 2MB")
+        setTimeout(() => setSaveMessage(""), 3000)
+        return
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setSaveMessage("Please select an image file")
+        setTimeout(() => setSaveMessage(""), 3000)
+        return
+      }
+
+      // Create preview URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const newAvatarUrl = e.target?.result as string
+        setProfile(prev => ({ ...prev, avatarUrl: newAvatarUrl }))
+        setSaveMessage("Avatar updated! Click 'Save Changes' to persist.")
+        setTimeout(() => setSaveMessage(""), 3000)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
   }
 
   const getSocialIcon = (platform: string) => {
@@ -173,7 +207,15 @@ export default function CreatorProfile() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <Button variant="outline" size="sm">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                  aria-label="Upload avatar image"
+                />
+                <Button variant="outline" size="sm" onClick={handleAvatarClick}>
                   <Camera className="h-4 w-4 mr-2" />
                   Change Avatar
                 </Button>
