@@ -1,56 +1,75 @@
 "use client"
 
 import * as React from "react"
-import { Home, Info, FileText, Archive, Mail } from "lucide-react"
+import { BarChart3, Package, MessageSquare, ShoppingCart, Target, Headphones } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "./team-switcher"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+
+  const productContext = React.useMemo(() => {
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] !== "creator") return null
+    if (segments[1] !== "products") return null
+    const productId = segments[2]
+    if (!productId) return null
+    return { productId }
+  }, [pathname])
   
   const data = {
-    user: {
-      name: "User",
-      email: "user@example.com",
-      avatar: "/avatars/user.jpg",
-    },
-    navMain: [
-      {
-        title: "Home",
-        url: "/",
-        icon: Home,
-        isActive: pathname === "/",
-      },
-      {
-        title: "About",
-        url: "/about",
-        icon: Info,
-      },
-      {
-        title: "Products",
-        url: "/blogs",
-        icon: FileText,
-      },
-      {
-        title: "Archive",
-        url: "/archive",
-        icon: Archive,
-      },
-      {
-        title: "Contact",
-        url: "/contact",
-        icon: Mail,
-      },
-    ],
+    navMain: productContext
+      ? [
+          {
+            title: "Product",
+            url: `/creator/products/${productContext.productId}`,
+            icon: Package,
+          },
+          {
+            title: "Comments",
+            url: `/creator/products/${productContext.productId}/comments`,
+            icon: MessageSquare,
+          },
+        ]
+      : [
+          {
+            title: "Dashboard",
+            url: "/creator",
+            icon: BarChart3,
+            isActive: pathname === "/creator",
+          },
+          {
+            title: "Products",
+            url: "/creator/products",
+            icon: Package,
+            isActive: pathname.startsWith("/creator/products"),
+          },
+          {
+            title: "Orders",
+            url: "/creator/orders",
+            icon: ShoppingCart,
+            isActive: pathname === "/creator/orders",
+          },
+          {
+            title: "Marketing",
+            url: "/creator/marketing",
+            icon: Target,
+            isActive: pathname === "/creator/marketing",
+          },
+          {
+            title: "Support",
+            url: "/creator/support",
+            icon: Headphones,
+            isActive: pathname === "/creator/support",
+          },
+        ],
   }
 
   return (
@@ -59,11 +78,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} label={productContext ? "" : "Creator"} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
     </Sidebar>
   )
 }

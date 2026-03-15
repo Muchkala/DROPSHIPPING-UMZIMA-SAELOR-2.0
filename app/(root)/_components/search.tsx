@@ -14,8 +14,8 @@ import { SearchIcon } from "lucide-react"
 export default function Search() {
     return (
         <Drawer>
-            <DrawerTrigger className={cn('cursor-pointer p-2 hover:bg-accent rounded-md transition-colors')}>
-                <SearchIcon className="h-4 w-4" />
+            <DrawerTrigger className={cn('cursor-pointer h-12 w-12 rounded-md hover:bg-accent transition-all duration-200 flex items-center justify-center')}>
+                <SearchIcon className="h-8 w-8" />
             </DrawerTrigger>
             <DrawerContent>
                 <DrawerHeader>
