@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/app/@components/providers/auth-provider"
+import { AUTH_CONFIG } from "@/lib/auth/config"
 import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 
 function LoginInner() {
@@ -71,12 +72,38 @@ function LoginInner() {
     }
   }
 
+  // Quick bypass login for development
+  const handleQuickLogin = async () => {
+    setIsSubmitting(true)
+    setError(null)
+    try {
+      await login("demo@example.com", "password", { remember })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Sign in</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Development bypass notice */}
+        {AUTH_CONFIG.SHOW_BYPASS_NOTICE && AUTH_CONFIG.BYPASS_ENABLED && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-sm text-yellow-800">
+              <AlertCircle className="h-4 w-4" />
+              <span>🔓 Auth is currently bypassed for development</span>
+            </div>
+            <p className="text-xs text-yellow-700 mt-1">
+              Any credentials will work, or use the quick login button below.
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 flex items-center gap-2 animate-pulse">
             <AlertCircle className="h-4 w-4" />
@@ -180,6 +207,26 @@ function LoginInner() {
               <>Sign in</>
             )}
           </Button>
+          
+          {/* Quick login for development */}
+          {AUTH_CONFIG.QUICK_LOGIN_ENABLED && AUTH_CONFIG.BYPASS_ENABLED && (
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={handleQuickLogin}
+              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Quick Login...
+                </>
+              ) : (
+                <>🚀 Quick Login (Dev)</>
+              )}
+            </Button>
+          )}
           <div className="text-center">
             <Link 
               href="/auth/forgot-password" 

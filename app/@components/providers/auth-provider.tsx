@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { authService, setRememberMe, type AuthUser } from "@/lib/auth"
+import { AUTH_CONFIG, getMockUser } from "@/lib/auth/config"
 
 type LoginOptions = {
   remember?: boolean
@@ -28,8 +29,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     setIsLoading(true)
     try {
-      const current = await authService.getCurrentUser()
-      setUser(current)
+      if (AUTH_CONFIG.BYPASS_ENABLED) {
+        // Bypass auth - set mock user
+        setUser(getMockUser())
+        console.log('🔓 Auth bypassed - mock user set')
+      } else {
+        // Normal auth flow
+        const current = await authService.getCurrentUser()
+        setUser(current)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -43,9 +51,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (email: string, password: string, options?: LoginOptions) => {
       setIsLoading(true)
       try {
-        setRememberMe(Boolean(options?.remember))
-        const u = await authService.login(email, password)
-        setUser(u)
+        if (AUTH_CONFIG.BYPASS_ENABLED) {
+          // Bypass auth - just set mock user
+          setUser(getMockUser())
+          console.log('🔓 Auth bypassed - mock user logged in')
+        } else {
+          // Normal auth flow
+          setRememberMe(Boolean(options?.remember))
+          const u = await authService.login(email, password)
+          setUser(u)
+        }
       } finally {
         setIsLoading(false)
       }
@@ -70,8 +85,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     setIsLoading(true)
     try {
-      await authService.logout()
-      setUser(null)
+      if (AUTH_CONFIG.BYPASS_ENABLED) {
+        // Bypass auth - just clear user
+        setUser(null)
+        console.log('🔓 Auth bypassed - user logged out')
+      } else {
+        // Normal auth flow
+        await authService.logout()
+        setUser(null)
+      }
     } finally {
       setIsLoading(false)
     }
