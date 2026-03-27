@@ -17,12 +17,12 @@ export default function Layout({ children }: ChildProps) {
     return (
         <RequireAuth>
             <TooltipProvider>
-                <SidebarProvider>
+                <SidebarProvider style={{ "--sidebar-top": "56px" } as React.CSSProperties}>
                     <AppSidebar />
-                    <SidebarInset>
+                    <SidebarInset className="pt-14">
                         {!isAuthPage && (
-                            <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-                                <SidebarTrigger className="ml-4" />
+                            <header className="fixed left-0 right-0 top-0 z-50 flex h-14 shrink-0 items-center gap-2 bg-[#2f2f2f] text-white">
+                                <SidebarTrigger className="ml-3 text-white hover:bg-white/10" />
                                 <div className="flex-1">
                                     <Navbar />
                                 </div>
