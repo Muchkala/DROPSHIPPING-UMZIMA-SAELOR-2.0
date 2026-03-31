@@ -123,4 +123,30 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Global thin dark scrollbar for all elements */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: #111827;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+  }
+  
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #374151 transparent;
+  }
 }
